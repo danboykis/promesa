@@ -75,11 +75,15 @@
            (.cancel fut true))))))
 
 #?(:clj
-   (extend-type ScheduledExecutorService
-     pt/IScheduler
-     (-schedule [this ms func]
-       (let [fut (.schedule this ^Runnable func ^long ms TimeUnit/MILLISECONDS)]
-         (scheduled-task fut)))))
+    (extend-type ScheduledExecutorService
+      pt/IScheduler
+      (-schedule [this ms func]
+        (let [fut (.schedule this ^Runnable func ^long ms TimeUnit/MILLISECONDS)]
+          (scheduled-task fut)))
+      (-schedule-repeatedly [this init-delay-ms delay-ms func]
+        (let [fut (.scheduleWithFixedDelay this ^Runnable func init-delay-ms delay-ms
+                                           java.util.concurrent.TimeUnit/MILLISECONDS)]
+          (scheduled-task fut)))))
 
 #?(:cljs
    (defn scheduler
@@ -94,6 +98,15 @@
                         (finally
                           (vreset! done? true))))
                cur (js/setTimeout task ms)]
+           (scheduled-task cur done?)))
+       (-schedule-repeatedly [_ init-delay-ms delay-ms func]
+         (let [done? (volatile! false)
+               task (fn []
+                      (try
+                        (func)
+                        (finally
+                          (vreset! done? true))))
+               cur (js/setTimeout task delay-ms)]
            (scheduled-task cur done?)))))
    :clj
    (defn- scheduler
@@ -107,3 +120,7 @@
 (defn schedule
   [ms func]
   (pt/-schedule @+scheduler+ ms func))
+
+(defn schedule-repeatedly
+  [init-delay-ms delay-ms func]
+  (pt/-schedule-repeatedly @+scheduler+ init-delay-ms delay-ms func))

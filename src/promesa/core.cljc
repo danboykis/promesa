@@ -53,6 +53,15 @@
   [ms func]
   (ps/schedule ms func))
 
+(defn schedule-repeatedly
+  "Schedule a callable to be executed after the `init-delay-ms` delay
+  is reached, then continue executing every `delay-ms`
+
+  In JVM it uses a scheduled executor service, no implementation
+  in JS yet"
+  [func init-delay-ms delay-ms]
+  (ps/schedule-repeatedly func init-delay-ms delay-ms))
+
 ;; --- Promise
 
 (defn resolved

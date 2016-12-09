@@ -49,4 +49,6 @@
 
 (defprotocol IScheduler
   "A generic abstraction for scheduler facilities."
-  (-schedule [_ ms func] "Schedule a function to be executed in future."))
+  (-schedule [_ ms func] "Schedule a function to be executed in future.")
+  (-schedule-repeatedly [_ init-delay-ms delay-ms func]
+                             "Schedule a function to be repeatedly executed in future."))
